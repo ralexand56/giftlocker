@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  box-sizing: border-box;
+}
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -24,4 +28,17 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+}
+
+dialog::backdrop {
+  background: linear-gradient(to bottom, transparent, rgb(var(red)))
+    rgb(var(blue));
+
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+@layer components {
+  .btn-primary {
+    @apply py-2 px-4 bg-orange-600 text-white font-semibold rounded-lg shadow-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75;
+  }
 }

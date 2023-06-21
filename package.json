@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo",
+    "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed": "tsc prisma\\seed.ts && ts-node prisma\\seed.js"
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.14",
     "@heroicons/react": "^2.0.17",
     "@types/node": "20.1.0",
     "@types/react": "18.2.6",
@@ -16,11 +18,22 @@
     "autoprefixer": "10.4.14",
     "eslint": "8.40.0",
     "eslint-config-next": "13.4.1",
+    "framer-motion": "^10.12.16",
+    "json-to-ts": "^1.7.0",
     "next": "13.4.1",
+    "next-auth": "^4.22.1",
     "postcss": "8.4.23",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "spotify-web-api-node": "^5.0.2",
     "tailwindcss": "3.3.2",
     "typescript": "5.0.4"
+  },
+  "devDependencies": {
+    "@prisma/client": "^4.14.0",
+    "@types/spotify-web-api-node": "^5.0.7",
+    "prettier": "^2.8.8",
+    "prettier-plugin-tailwindcss": "^0.2.8",
+    "prisma": "^4.14.0"
   }
 }

@@ -1,0 +1,289 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model EFMigrationsHistory {
+  MigrationId    String @id(map: "PK___EFMigrationsHistory") @db.NVarChar(150)
+  ProductVersion String @db.NVarChar(32)
+
+  @@map("__EFMigrationsHistory")
+}
+
+model AssessmentExternalUser {
+  AssessmentsId       String        @db.UniqueIdentifier
+  ExternalAssessorsId String        @db.UniqueIdentifier
+  Assessments         Assessments   @relation(fields: [AssessmentsId], references: [Id], onUpdate: NoAction, map: "FK_AssessmentExternalUser_Assessments_AssessmentsId")
+  ExternalUsers       ExternalUsers @relation(fields: [ExternalAssessorsId], references: [Id], onUpdate: NoAction, map: "FK_AssessmentExternalUser_ExternalUsers_ExternalAssessorsId")
+
+  @@id([AssessmentsId, ExternalAssessorsId], map: "PK_AssessmentExternalUser")
+  @@index([ExternalAssessorsId], map: "IX_AssessmentExternalUser_ExternalAssessorsId")
+}
+
+model Assessments {
+  Id                     String                   @id(map: "PK_Assessments") @db.UniqueIdentifier
+  Status                 String                   @db.NVarChar(Max)
+  AssessmentType         String                   @db.NVarChar(Max)
+  AssessmentApproach     String?                  @db.NVarChar(Max)
+  ControlAssessorStatus  String?                  @db.NVarChar(Max)
+  StartDate              DateTime                 @db.DateTimeOffset
+  EndDate                DateTime?                @db.DateTimeOffset
+  CreatedOn              DateTime                 @db.DateTimeOffset
+  CreatedBy              String?                  @db.NVarChar(Max)
+  UpdatedOn              DateTime                 @db.DateTimeOffset
+  UpdatedBy              String?                  @db.NVarChar(Max)
+  IsDeleted              Boolean
+  TenantID               String                   @default(dbgenerated(), map: "DF__Assessmen__Tenan__3B95D2F1") @db.UniqueIdentifier
+  Name                   String                   @default("N'", map: "DF__Assessment__Name__4CC05EF3") @db.NVarChar(Max)
+  UserId                 String?                  @db.UniqueIdentifier
+  AssessmentExternalUser AssessmentExternalUser[]
+  Tenant                 Tenant                   @relation(fields: [TenantID], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Assessments_Tenant_TenantID")
+  Users                  Users?                   @relation(fields: [UserId], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Assessments_Users_UserId")
+  ControlAssessors       ControlAssessors[]
+
+  @@index([TenantID], map: "IX_Assessments_TenantID")
+  @@index([UserId], map: "IX_Assessments_UserId")
+}
+
+model BillingAddresses {
+  Id           String   @id(map: "PK_BillingAddresses") @db.UniqueIdentifier
+  AddressLine1 String?  @db.NVarChar(Max)
+  AddressLine2 String?  @db.NVarChar(Max)
+  City         String?  @db.NVarChar(Max)
+  State        String?  @db.NVarChar(Max)
+  Zip          String?  @db.NVarChar(Max)
+  Country      String?  @db.NVarChar(Max)
+  CreatedOn    DateTime
+  CreatedBy    String?  @db.NVarChar(Max)
+  UpdatedOn    DateTime
+  UpdatedBy    String?  @db.NVarChar(Max)
+  IsDeleted    Boolean
+  Tenant       Tenant[]
+}
+
+model BillingAdminDetails {
+  Id           String   @id(map: "PK_BillingAdminDetails") @db.UniqueIdentifier
+  FirstName    String?  @db.NVarChar(Max)
+  LastName     String?  @db.NVarChar(Max)
+  BillingEmail String?  @db.NVarChar(Max)
+  Phone        String?  @db.NVarChar(Max)
+  CreatedOn    DateTime
+  CreatedBy    String?  @db.NVarChar(Max)
+  UpdatedOn    DateTime
+  UpdatedBy    String?  @db.NVarChar(Max)
+  IsDeleted    Boolean
+  Tenant       Tenant[]
+}
+
+model BillingDetails {
+  Id             String   @id(map: "PK_BillingDetails") @db.UniqueIdentifier
+  PaymentMethod  String?  @db.NVarChar(Max)
+  PaymentMethod2 String?  @db.NVarChar(Max)
+  CardNumber     String?  @db.NVarChar(Max)
+  ExpirationDate String?  @db.NVarChar(Max)
+  Name           String?  @db.NVarChar(Max)
+  SecurityCode   String?  @db.NVarChar(Max)
+  AddressLine1   String?  @db.NVarChar(Max)
+  AddressLine2   String?  @db.NVarChar(Max)
+  City           String?  @db.NVarChar(Max)
+  State          String?  @db.NVarChar(Max)
+  Zip            String?  @db.NVarChar(Max)
+  Country        String?  @db.NVarChar(Max)
+  BillingPlan    Int
+  CreatedOn      DateTime
+  CreatedBy      String?  @db.NVarChar(Max)
+  UpdatedOn      DateTime
+  UpdatedBy      String?  @db.NVarChar(Max)
+  IsDeleted      Boolean
+  Tenant         Tenant[]
+}
+
+model ControlAssessors {
+  Id           String      @id(map: "PK_ControlAssessors") @db.UniqueIdentifier
+  AssessmentId String      @db.UniqueIdentifier
+  UserId       String      @db.UniqueIdentifier
+  Tier         String?     @db.NVarChar(Max)
+  CreatedOn    DateTime    @db.DateTimeOffset
+  CreatedBy    String?     @db.NVarChar(Max)
+  UpdatedOn    DateTime    @db.DateTimeOffset
+  UpdatedBy    String?     @db.NVarChar(Max)
+  IsDeleted    Boolean
+  Assessments  Assessments @relation(fields: [AssessmentId], references: [Id], onUpdate: NoAction, map: "FK_ControlAssessors_Assessments_AssessmentId")
+  Users        Users       @relation(fields: [UserId], references: [Id], onUpdate: NoAction, map: "FK_ControlAssessors_Users_UserId")
+
+  @@index([AssessmentId], map: "IX_ControlAssessors_AssessmentId")
+  @@index([UserId], map: "IX_ControlAssessors_UserId")
+}
+
+model DashboardCard {
+  Id                String         @id(map: "PK_DashboardCard") @db.UniqueIdentifier
+  TenantID          String         @db.UniqueIdentifier
+  DashboardName     Int
+  QueryID           String         @db.UniqueIdentifier
+  Height            Int
+  Width             Int
+  X                 Int
+  Y                 Int
+  AggregationField  Int            @default(0, map: "DF__Dashboard__Aggre__4BCC3ABA")
+  AggregationItems  String?        @db.NVarChar(Max)
+  SortBy            String?        @db.NVarChar(Max)
+  SortOrder         Int            @default(0, map: "DF__Dashboard__SortO__4AD81681")
+  MajorConcernColor String?        @db.NVarChar(Max)
+  MinorConcernColor String?        @db.NVarChar(Max)
+  SatisfactoryColor String?        @db.NVarChar(Max)
+  Title             String?        @db.NVarChar(Max)
+  WidgetType        Int
+  CreatedOn         DateTime
+  CreatedBy         String?        @db.NVarChar(Max)
+  UpdatedOn         DateTime
+  UpdatedBy         String?        @db.NVarChar(Max)
+  IsDeleted         Boolean
+  GroupBy           String?        @db.NVarChar(Max)
+  IsDefault         Boolean        @default(dbgenerated("CONVERT([bit],(0))"), map: "DF__Dashboard__IsDef__47FBA9D6")
+  UserId            String         @default(dbgenerated(), map: "DF__Dashboard__UserI__48EFCE0F") @db.UniqueIdentifier
+  DashboardQuery    DashboardQuery @relation(fields: [QueryID], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_DashboardCard_DashboardQuery_QueryID")
+  Tenant            Tenant         @relation(fields: [TenantID], references: [Id], onUpdate: NoAction, map: "FK_DashboardCard_Tenant_TenantID")
+  Users             Users          @relation(fields: [UserId], references: [Id], onUpdate: NoAction, map: "FK_DashboardCard_Users_UserId")
+
+  @@index([QueryID], map: "IX_DashboardCard_QueryID")
+  @@index([TenantID], map: "IX_DashboardCard_TenantID")
+  @@index([UserId], map: "IX_DashboardCard_UserId")
+}
+
+model DashboardQuery {
+  Id            String          @id(map: "PK_DashboardQuery") @db.UniqueIdentifier
+  TenantID      String          @db.UniqueIdentifier
+  Name          String?         @db.NVarChar(Max)
+  Query         String?         @db.NVarChar(Max)
+  CreatedOn     DateTime
+  CreatedBy     String?         @db.NVarChar(Max)
+  UpdatedOn     DateTime
+  UpdatedBy     String?         @db.NVarChar(Max)
+  IsDeleted     Boolean
+  DashboardCard DashboardCard[]
+  Tenant        Tenant          @relation(fields: [TenantID], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_DashboardQuery_Tenant_TenantID")
+
+  @@index([TenantID], map: "IX_DashboardQuery_TenantID")
+}
+
+model Domains {
+  Id                   String   @id(map: "PK_Domains") @db.UniqueIdentifier
+  DomainName           String?  @db.NVarChar(Max)
+  WillManageOwnRecords Boolean
+  TxtName              String?  @db.NVarChar(Max)
+  TxtValue             String?  @db.NVarChar(Max)
+  IsVerified           Boolean
+  IsDefault            Boolean
+  TenantID             String   @db.UniqueIdentifier
+  CreatedOn            DateTime
+  CreatedBy            String?  @db.NVarChar(Max)
+  UpdatedOn            DateTime
+  UpdatedBy            String?  @db.NVarChar(Max)
+  IsDeleted            Boolean
+  Tenant               Tenant   @relation(fields: [TenantID], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Domains_Tenant_TenantID")
+
+  @@index([TenantID], map: "IX_Domains_TenantID")
+}
+
+model ExternalUsers {
+  Id                     String                   @id(map: "PK_ExternalUsers") @db.UniqueIdentifier
+  Email                  String?                  @db.NVarChar(Max)
+  Name                   String                   @db.NVarChar(Max)
+  Type                   String?                  @db.NVarChar(Max)
+  Certifications         String?                  @db.NVarChar(Max)
+  Approach               String?                  @db.NVarChar(Max)
+  AssessmentType         String?                  @db.NVarChar(Max)
+  Review                 String?                  @db.NVarChar(Max)
+  CreatedOn              DateTime                 @db.DateTimeOffset
+  CreatedBy              String?                  @db.NVarChar(Max)
+  UpdatedOn              DateTime                 @db.DateTimeOffset
+  UpdatedBy              String?                  @db.NVarChar(Max)
+  IsDeleted              Boolean
+  AssessmentExternalUser AssessmentExternalUser[]
+}
+
+model Systems {
+  Id           String   @id(map: "PK_Systems") @db.UniqueIdentifier
+  Name         String?  @db.NVarChar(Max)
+  State        String?  @db.NVarChar(Max)
+  Country      String?  @db.NVarChar(Max)
+  LocationType String?  @db.NVarChar(Max)
+  TenantID     String   @db.UniqueIdentifier
+  CreatedOn    DateTime
+  CreatedBy    String?  @db.NVarChar(Max)
+  UpdatedOn    DateTime
+  UpdatedBy    String?  @db.NVarChar(Max)
+  IsDeleted    Boolean
+  Tenant       Tenant   @relation(fields: [TenantID], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Systems_Tenant_TenantID")
+
+  @@index([TenantID], map: "IX_Systems_TenantID")
+}
+
+model Tenant {
+  Id                   String               @id(map: "PK_Tenant") @db.UniqueIdentifier
+  OrganizationType     String               @db.NVarChar(Max)
+  BusinessPhoneNumber  String?              @db.NVarChar(Max)
+  CompanyName          String?              @db.NVarChar(Max)
+  Country              String?              @db.NVarChar(Max)
+  ContactPermission    Boolean
+  PhoneNumber          String?              @db.NVarChar(Max)
+  BillingAddressID     String?              @db.UniqueIdentifier
+  BillingAdminDetailID String?              @db.UniqueIdentifier
+  BillingDetailID      String?              @db.UniqueIdentifier
+  SecondaryPhoneNumber String?              @db.NVarChar(Max)
+  SecondaryCountryCode String?              @db.NVarChar(Max)
+  CreatedOn            DateTime
+  CreatedBy            String?              @db.NVarChar(Max)
+  UpdatedOn            DateTime
+  UpdatedBy            String?              @db.NVarChar(Max)
+  IsDeleted            Boolean
+  Assessments          Assessments[]
+  DashboardCard        DashboardCard[]
+  DashboardQuery       DashboardQuery[]
+  Domains              Domains[]
+  Systems              Systems[]
+  BillingAddresses     BillingAddresses?    @relation(fields: [BillingAddressID], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Tenant_BillingAddresses_BillingAddressID")
+  BillingAdminDetails  BillingAdminDetails? @relation(fields: [BillingAdminDetailID], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Tenant_BillingAdminDetails_BillingAdminDetailID")
+  BillingDetails       BillingDetails?      @relation(fields: [BillingDetailID], references: [Id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Tenant_BillingDetails_BillingDetailID")
+  Users                Users[]
+
+  @@index([BillingAddressID], map: "IX_Tenant_BillingAddressID")
+  @@index([BillingAdminDetailID], map: "IX_Tenant_BillingAdminDetailID")
+  @@index([BillingDetailID], map: "IX_Tenant_BillingDetailID")
+}
+
+model Users {
+  Id               String             @id(map: "PK_Users") @db.UniqueIdentifier
+  Email            String             @db.NVarChar(Max)
+  FirstName        String             @db.NVarChar(Max)
+  LastName         String             @db.NVarChar(Max)
+  IsActive         Boolean
+  TenantID         String             @db.UniqueIdentifier
+  CreatedOn        DateTime
+  CreatedBy        String?            @db.NVarChar(Max)
+  UpdatedOn        DateTime
+  UpdatedBy        String?            @db.NVarChar(Max)
+  IsDeleted        Boolean
+  City             String?            @db.NVarChar(Max)
+  CountryOrRegion  String?            @db.NVarChar(Max)
+  Department       String?            @db.NVarChar(Max)
+  DisplayName      String?            @db.NVarChar(Max)
+  FaxNumber        String?            @db.NVarChar(Max)
+  JobTitle         String?            @db.NVarChar(Max)
+  MobilePhone      String?            @db.NVarChar(Max)
+  Office           String?            @db.NVarChar(Max)
+  OfficePhone      String?            @db.NVarChar(Max)
+  StateOrProvince  String?            @db.NVarChar(Max)
+  StreetAddress    String?            @db.NVarChar(Max)
+  ZipOrPostal      String?            @db.NVarChar(Max)
+  Assessments      Assessments[]
+  ControlAssessors ControlAssessors[]
+  DashboardCard    DashboardCard[]
+  Tenant           Tenant             @relation(fields: [TenantID], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Users_Tenant_TenantID")
+
+  @@index([TenantID], map: "IX_Users_TenantID")
+}
